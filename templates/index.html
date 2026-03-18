@@ -7,19 +7,14 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <!-- Background image container -->
     <div class="background-container"></div>
 
+    <h1 style="font-size: 100px; font-Algerian: bold; color: Orange;">Sunshine Hotel</h1>
+    <h2 style="font-size: 36px; color: #333;"><strong>Welcome to Sunshine Hotel</strong></h2>
+    <h2 style="font-size: 36px; color: #555;"><strong>Please visit our new and faster booking</strong></h2>
+    <h2 style="font-size: 36px; color: #008080;"><strong>Enjoy your trip</strong></h2>
 
-      <h1 style="font-size: 100px; font-Algerian: bold; color:Orange;">Sunshine Hotel</h1>
-<h2 style="font-size: 36px; color: #333;"><strong>Welcome to Sunshine Hotel</strong></h2>
-<h2 style="font-size: 36px; color: #555;"><strong>Please visit our new and faster booking</strong></h2>
-<h2 style="font-size: 36px; color: #008080;"><strong>Enjoy your trip</strong></h2>
-
-
-    <!-- Main content container -->
     <div class="main-container">
-        <!-- Student details section -->
         <div class="student-details">
             <h2>Student Details</h2>
             <p><strong>Name:</strong> Raviteja Reddy</p>
@@ -27,14 +22,15 @@
             <p><strong>Subject:</strong> AI Use Case (DLMAIPAIUC01)</p>
         </div>
 
-        <!-- iPhone frame with chatbot -->
         <div class="iphone-frame">
             <div class="iphone-notch"></div>
             <div class="iphone-screen">
                 <div class="chat-container">
                     <div class="chat-header">
                         <h2>👩🏻‍💼 Sunshine bot</h2>
+                        <a href="/reset" class="reset-button">Start New Chat</a>
                     </div>
+
                     <div class="chat-messages">
                         {% for message in messages %}
                             <div class="message {% if 'You:' in message %}user-message{% else %}bot-message{% endif %}">
@@ -42,6 +38,7 @@
                             </div>
                         {% endfor %}
                     </div>
+
                     <div class="chat-input">
                         <form method="POST" action="/">
                             <input type="text" name="user_input" placeholder="Type your message here..." autofocus required>

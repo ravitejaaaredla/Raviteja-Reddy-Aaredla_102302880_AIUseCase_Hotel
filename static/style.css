@@ -45,13 +45,10 @@ body {
 /* Student details section */
 .student-details {
     position: absolute;
-    bottom:1px;
+    bottom: 1px;
     left: 1px;
-    width: 250px
-    color: white;
-    padding: 20px;
-    border-radius: 10px;
-    z-index: 10;
+    width: 250px;
+    color: Black;
 }
 
 .student-details h2 {
