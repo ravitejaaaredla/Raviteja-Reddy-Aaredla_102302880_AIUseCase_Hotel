@@ -316,17 +316,17 @@ def index():
         session['messages'] = []
 
         msg = chatbot.get_response('welcome', session['data'])
-        session['messages'].append(f"Bot: {msg}")
+        session['messages'].append(f"👩🏻‍💼: {msg}")
         session.modified = True
 
     if request.method == 'POST':
         user_input = request.form.get('user_input', '').strip()
 
         if user_input:
-            session['messages'].append(f"You: {user_input}")
+            session['messages'].append(f": {user_input}")
 
             response = chatbot.get_response(session['step'], session['data'], user_input)
-            session['messages'].append(f"Bot: {response}")
+            session['messages'].append(f"👩🏻‍💼: {response}")
 
             faq_answer = chatbot.get_faq_response(user_input)
 
