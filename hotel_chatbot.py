@@ -225,11 +225,14 @@ class AdvancedHotelChatbot:
         except Exception:
             return None
 
-    def get_response(self, step, data, message=None):
         if message:
             faq_answer = self.get_faq_response(message)
-            if faq_answer:
+
+            if faq_answer and step == 'welcome':
                 return faq_answer
+            if faq_answer and step != 'welcome':
+                if "Hello!" not in faq_answer:
+                    return faq_answer
 
         if step == 'welcome':
             return random.choice(self.training_responses['greeting']) + " " + random.choice(self.training_responses['ask_name'])
@@ -323,7 +326,7 @@ def index():
         user_input = request.form.get('user_input', '').strip()
 
         if user_input:
-            session['messages'].append(f": {user_input}")
+            session['messages'].append(f" {user_input}")
 
             response = chatbot.get_response(session['step'], session['data'], user_input)
             session['messages'].append(f"👩🏻‍💼: {response}")
@@ -337,6 +340,7 @@ def index():
                     'get_breakfast', 'confirm_booking'
                 ]
 
+            if not chatbot.get_faq_response(user_input):
                 if session['step'] in flow:
                     idx = flow.index(session['step'])
                     if idx + 1 < len(flow):
