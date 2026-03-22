@@ -59,6 +59,119 @@ class AdvancedHotelChatbot:
             ]
         }
 
+        self.faq_responses = {
+            "greeting": {
+                "patterns": ["hello", "hi", "hey", "good morning", "good evening"],
+                "answer": "Hello! Welcome to Sunshine Hotel 🌞 How can I assist you today? You can ask about rooms, check-in, breakfast, parking, or start a booking."
+            },
+            "checkin_checkout": {
+                "patterns": [
+                    "what time is check in",
+                    "what time is check-in",
+                    "check in time",
+                    "check-in time",
+                    "what time is check out",
+                    "what time is check-out",
+                    "check out time",
+                    "check-out time"
+                ],
+                "answer": "Our check-in time is 2:00 PM and check-out time is 11:00 AM."
+            },
+            "room_availability": {
+                "patterns": [
+                    "do you have any available rooms",
+                    "available rooms",
+                    "rooms available",
+                    "is any room available"
+                ],
+                "answer": "Yes, room availability depends on your check-in and check-out dates. I can help you check and book a single, double, or suite room."
+            },
+            "wifi": {
+                "patterns": [
+                    "what's the wi-fi password",
+                    "wifi password",
+                    "wi-fi password",
+                    "internet password"
+                ],
+                "answer": "Our complimentary Wi-Fi is available for all guests. The Wi-Fi password is shared at reception during check-in."
+            },
+            "breakfast": {
+                "patterns": [
+                    "do you offer breakfast",
+                    "breakfast",
+                    "breakfast timing",
+                    "what are the breakfast timings"
+                ],
+                "answer": "Yes, we offer breakfast daily from 7:00 AM to 10:00 AM for an additional $20 per person."
+            },
+            "parking": {
+                "patterns": [
+                    "is parking available",
+                    "is parking free",
+                    "parking",
+                    "do you have parking"
+                ],
+                "answer": "Yes, parking is available for guests. Complimentary parking is subject to availability."
+            },
+            "nearby_places": {
+                "patterns": [
+                    "can you recommend nearby restaurants",
+                    "nearby restaurants",
+                    "nearby attractions",
+                    "places to visit nearby",
+                    "restaurants nearby"
+                ],
+                "answer": "Yes, there are several restaurants, cafés, and local attractions near the hotel. Our reception team can recommend the best nearby options based on your interests."
+            },
+            "facilities": {
+                "patterns": [
+                    "is there a gym",
+                    "is there a pool",
+                    "is there a spa",
+                    "gym pool spa",
+                    "do you have a gym"
+                ],
+                "answer": "We offer selected wellness facilities for guests. Please check with reception for current availability of the gym, pool, and spa."
+            },
+            "airport_shuttle": {
+                "patterns": [
+                    "do you provide airport shuttle service",
+                    "airport shuttle",
+                    "shuttle service",
+                    "airport transfer"
+                ],
+                "answer": "Airport shuttle service can be arranged on request, depending on availability and schedule."
+            },
+            "luggage": {
+                "patterns": [
+                    "can you help with luggage",
+                    "luggage help",
+                    "baggage help",
+                    "can you store luggage"
+                ],
+                "answer": "Yes, we can assist with luggage and also offer luggage storage before check-in or after check-out."
+            },
+            "cancellation": {
+                "patterns": [
+                    "what's the cancellation policy",
+                    "cancellation policy",
+                    "can i cancel my booking",
+                    "booking cancellation"
+                ],
+                "answer": "Our cancellation policy depends on the booking type and rate selected. Standard bookings can usually be cancelled up to 24 hours before check-in."
+            }
+        }
+
+    def get_faq_response(self, message):
+        message_lower = message.lower().strip()
+
+        for faq in self.faq_responses.values():
+            for pattern in faq["patterns"]:
+                if pattern in message_lower:
+                    return faq["answer"]
+
+        return None
+
     def parse_date(self, text):
         text = text.strip().lower()
 
@@ -78,8 +191,6 @@ class AdvancedHotelChatbot:
         return None
 
     def extract_info(self, message, step):
-        message_lower = message.lower().strip()
-
         if step == 'get_name':
             return message.strip().title()
 
@@ -95,7 +206,7 @@ class AdvancedHotelChatbot:
             match = re.search(r'\d+', message)
             return match.group(0) if match else None
 
-        return message
+        return message.strip()
 
     def calculate_price(self, data):
         try:
@@ -111,10 +222,14 @@ class AdvancedHotelChatbot:
             breakfast = self.breakfast_price * guests if data['breakfast'] == 'yes' else 0
 
             return (base + breakfast) * nights
-        except:
+        except Exception:
             return None
 
     def get_response(self, step, data, message=None):
+        if message:
+            faq_answer = self.get_faq_response(message)
+            if faq_answer:
+                return faq_answer
 
         if step == 'welcome':
             return random.choice(self.training_responses['greeting']) + " " + random.choice(self.training_responses['ask_name'])
@@ -153,17 +268,17 @@ class AdvancedHotelChatbot:
             return "Enter valid number of guests."
 
         elif step == 'get_room_type':
-            if message.lower() in ['single', 'double', 'suite']:
+            if message and message.lower() in ['single', 'double', 'suite']:
                 data['room_type'] = message.lower()
                 return random.choice(self.training_responses['ask_breakfast'])
             return "Choose: single / double / suite"
 
         elif step == 'get_breakfast':
-            if message.lower() in ['yes', 'no']:
+            if message and message.lower() in ['yes', 'no']:
                 data['breakfast'] = message.lower()
                 price = self.calculate_price(data)
                 if price is None:
-                    return "Error in calculation."
+                    return "Error in calculation. Please check your dates."
 
                 data['price'] = price
 
@@ -183,14 +298,13 @@ Confirm? (yes/no)
             return "Please answer yes/no"
 
         elif step == 'confirm_booking':
-            if message.lower() == 'yes':
+            if message and message.lower() == 'yes':
                 return f"Booking confirmed! 🎉 Email sent to {data['email']}"
             return "Booking cancelled."
 
         return "Start booking by typing anything."
 
 
-# initialize chatbot
 chatbot = AdvancedHotelChatbot()
 
 
@@ -203,27 +317,31 @@ def index():
 
         msg = chatbot.get_response('welcome', session['data'])
         session['messages'].append(("Bot", msg))
+        session.modified = True
 
     if request.method == 'POST':
-        user_input = request.form.get('user_input')
+        user_input = request.form.get('user_input', '').strip()
 
-        session['messages'].append(("You", user_input))
+        if user_input:
+            session['messages'].append(("You", user_input))
 
-        response = chatbot.get_response(session['step'], session['data'], user_input)
-        session['messages'].append(("Bot", response))
+            faq_answer = chatbot.get_faq_response(user_input)
+            response = chatbot.get_response(session['step'], session['data'], user_input)
+            session['messages'].append(("Bot", response))
 
-        flow = [
-            'welcome', 'get_name', 'get_email', 'get_checkin',
-            'get_checkout', 'get_guests', 'get_room_type',
-            'get_breakfast', 'confirm_booking'
-        ]
+            if not faq_answer:
+                flow = [
+                    'welcome', 'get_name', 'get_email', 'get_checkin',
+                    'get_checkout', 'get_guests', 'get_room_type',
+                    'get_breakfast', 'confirm_booking'
+                ]
 
-        if session['step'] in flow:
-            idx = flow.index(session['step'])
-            if idx + 1 < len(flow):
-                session['step'] = flow[idx + 1]
+                if session['step'] in flow:
+                    idx = flow.index(session['step'])
+                    if idx + 1 < len(flow):
+                        session['step'] = flow[idx + 1]
 
-        session.modified = True
+            session.modified = True
 
     return render_template('index.html', messages=session['messages'])
 
