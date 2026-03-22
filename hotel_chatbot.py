@@ -316,18 +316,19 @@ def index():
         session['messages'] = []
 
         msg = chatbot.get_response('welcome', session['data'])
-        session['messages'].append(("Bot", msg))
+        session['messages'].append(f"Bot: {msg}")
         session.modified = True
 
     if request.method == 'POST':
         user_input = request.form.get('user_input', '').strip()
 
         if user_input:
-            session['messages'].append(("You", user_input))
+            session['messages'].append(f"You: {user_input}")
+
+            response = chatbot.get_response(session['step'], session['data'], user_input)
+            session['messages'].append(f"Bot: {response}")
 
             faq_answer = chatbot.get_faq_response(user_input)
-            response = chatbot.get_response(session['step'], session['data'], user_input)
-            session['messages'].append(("Bot", response))
 
             if not faq_answer:
                 flow = [
@@ -344,13 +345,3 @@ def index():
             session.modified = True
 
     return render_template('index.html', messages=session['messages'])
-
-
-@app.route('/reset')
-def reset():
-    session.clear()
-    return redirect(url_for('index'))
-
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
