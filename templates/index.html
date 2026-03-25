@@ -32,13 +32,18 @@
                     </div>
 
                     <div class="chat-messages">
-                        {% for message in messages %}
-                            <div class="message {% if 'You:' in message %}user-message{% else %}bot-message{% endif %}">
-                                {{ message }}
-                            </div>
+                       {% for message in messages %}
+                        {% if 'You:' in message %}
+                        <div class="message user-message">
+                            {{ message.replace('You:', '') }}
+                        </div>
+                        {% else %}
+                        <div class="message bot-message">
+                            {{ message.replace('👩🏻‍💼:', '') }}
+                        </div>
+                        {% endif %}
                         {% endfor %}
                     </div>
-
                     <div class="chat-input">
                         <form method="POST" action="/">
                             <input type="text" name="user_input" placeholder="Type your message here..." autofocus required>
